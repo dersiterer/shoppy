@@ -1,633 +1,870 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>|Shoppy|</title>
     <!-- Реальный Яндекс Карт API -->
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+    <script
+      src="https://api-maps.yandex.ru/2.1/?lang=ru_RU"
+      type="text/javascript"
+    ></script>
     <style>
-        :root {
-            --bg-color: #000000;
-            --panel-bg: rgba(10, 10, 10, 0.95);
-            --text-color: #ffffff;
-            --accent-color: #ff0000;
-            --font-main: 'Courier New', Courier, monospace;
-        }
+      :root {
+        --bg-color: #000000;
+        --panel-bg: rgba(10, 10, 10, 0.95);
+        --text-color: #ffffff;
+        --accent-color: #ff0000;
+        --font-main: "Courier New", Courier, monospace;
+      }
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            font-family: var(--font-main);
-            background-color: var(--bg-color);
-            overflow: hidden;
-        }
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        font-family: var(--font-main);
+        background-color: var(--bg-color);
+        overflow: hidden;
+      }
 
-        /* КАРТА */
-        #map {
-            width: 100vw;
-            height: 100vh;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-            background: #000; 
-        }
+      /* КАРТА */
+      #map {
+        width: 100vw;
+        height: 100vh;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        background: #000;
+      }
 
-        /* ТЕМНАЯ ТЕМА КАРТЫ */
-        [class*="-ground-pane"] {
-            filter: grayscale(1) invert(1) contrast(1.1);
-        }
+      /* ТЕМНАЯ ТЕМА КАРТЫ */
+      [class*="-ground-pane"] {
+        filter: grayscale(1) invert(1) contrast(1.1);
+      }
 
-        /* ЛОГОТИП С ЯПОНСКОЙ НАДПИСЬЮ НА ФОНЕ */
-        .header-logo {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            z-index: 100;
-            width: 250px;
-            height: 60px;
-            pointer-events: none;
-        }
-        
-        .logo-bg {
-            position: absolute;
-            font-size: 55px;
-            color: rgba(255, 0, 0, 0.35);
-            font-weight: bold;
-            z-index: 1;
-            right: -10px;
-            top: -15px;
-            user-select: none;
-            letter-spacing: 2px;
-            font-family: sans-serif;
-        }
+      /* ЛОГОТИП С ЯПОНСКОЙ НАДПИСЬЮ НА ФОНЕ */
+      .header-logo {
+        position: absolute;
+        top: 30px;
+        right: 30px;
+        z-index: 100;
+        width: 250px;
+        height: 60px;
+        pointer-events: none;
+      }
 
-        .logo-fg {
-            position: absolute;
-            font-size: 38px;
-            color: var(--text-color);
-            border-bottom: 5px solid var(--accent-color);
-            text-transform: uppercase;
-            font-family: var(--font-main);
-            font-weight: bold;
-            z-index: 2;
-            right: 0;
-            bottom: 0;
-            padding-bottom: 5px;
-            text-shadow: 2px 2px 0px #000;
-        }
+      .logo-bg {
+        position: absolute;
+        font-size: 55px;
+        color: rgba(255, 0, 0, 0.35);
+        font-weight: bold;
+        z-index: 1;
+        right: -10px;
+        top: -15px;
+        user-select: none;
+        letter-spacing: 2px;
+        font-family: sans-serif;
+      }
 
-        /* ГЛАВНОЕ МЕНЮ */
-        .ui-container {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 10;
-            width: 320px;
-            background-color: rgba(0, 0, 0, 0.9);
-            border: 3px solid var(--text-color);
-            box-shadow: 8px 8px 0px var(--accent-color);
-            display: flex;
-            flex-direction: column;
-            max-height: calc(100vh - 40px);
-            transition: opacity 0.3s;
-        }
+      .logo-fg {
+        position: absolute;
+        font-size: 38px;
+        color: var(--text-color);
+        border-bottom: 5px solid var(--accent-color);
+        text-transform: uppercase;
+        font-family: var(--font-main);
+        font-weight: bold;
+        z-index: 2;
+        right: 0;
+        bottom: 0;
+        padding-bottom: 5px;
+        text-shadow: 2px 2px 0px #000;
+      }
 
-        .dropdown-toggle {
-            background-color: var(--text-color);
-            color: var(--bg-color);
-            font-family: var(--font-main);
-            font-size: 18px;
-            font-weight: bold;
-            padding: 15px;
-            cursor: pointer;
-            border: none;
-            text-transform: uppercase;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .dropdown-toggle:hover {
-            background-color: var(--accent-color);
-            color: var(--text-color);
-        }
+      /* ГЛАВНОЕ МЕНЮ */
+      .ui-container {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 10;
+        width: 330px;
+        background-color: rgba(0, 0, 0, 0.92);
+        border: 3px solid var(--text-color);
+        box-shadow: 8px 8px 0px var(--accent-color);
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100vh - 40px);
+        transition: opacity 0.3s;
+      }
 
-        .dropdown-content {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
+      .dropdown-toggle {
+        background-color: var(--text-color);
+        color: var(--bg-color);
+        font-family: var(--font-main);
+        font-size: 18px;
+        font-weight: bold;
+        padding: 15px;
+        cursor: pointer;
+        border: none;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
 
-        .dropdown-content.collapsed { display: none; }
+      .dropdown-toggle:hover {
+        background-color: var(--accent-color);
+        color: var(--text-color);
+      }
 
-        .filters {
-            padding: 15px;
-            border-bottom: 2px dashed var(--accent-color);
-        }
+      .dropdown-content {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+      }
 
-        .filters h3 { margin: 0 0 10px 0; color: var(--accent-color); font-size: 14px; text-transform: uppercase; }
+      .dropdown-content.collapsed {
+        display: none;
+      }
 
-        .filter-btn {
-            background-color: transparent;
-            color: var(--text-color);
-            border: 1px solid var(--text-color);
-            padding: 5px 10px;
-            margin: 0 5px 5px 0;
-            font-family: var(--font-main);
-            font-size: 12px;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
+      /* ВЫПАДАЮЩИЕ СПИСКИ ФИЛЬТРОВ */
+      .filters {
+        padding: 12px 15px;
+        border-bottom: 2px dashed var(--accent-color);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
 
-        .filter-btn.active, .filter-btn:hover { background-color: var(--accent-color); border-color: var(--accent-color); color: var(--text-color); }
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
 
-        .store-list {
-            padding: 15px;
-            overflow-y: auto;
-            max-height: 350px;
-        }
-        
-        .store-list::-webkit-scrollbar { width: 5px; }
-        .store-list::-webkit-scrollbar-track { background: #000; }
-        .store-list::-webkit-scrollbar-thumb { background: #ff0000; }
+      .filter-group label {
+        color: var(--accent-color);
+        font-size: 11px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
 
-        .store-item {
-            border: 1px solid #333;
-            padding: 10px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: border-color 0.2s;
-        }
-        .store-item:hover { border-color: var(--text-color); background-color: rgba(255, 255, 255, 0.05); }
-        .store-item.hidden { display: none; }
-        .store-title { color: var(--text-color); font-size: 16px; font-weight: bold; margin: 0 0 5px 0; text-transform: uppercase; }
-        .store-style { color: var(--accent-color); font-size: 12px; margin-bottom: 5px; }
+      .filter-select {
+        background-color: #0a0a0a;
+        color: var(--text-color);
+        border: 1px solid var(--text-color);
+        padding: 8px 10px;
+        font-family: var(--font-main);
+        font-size: 12px;
+        text-transform: uppercase;
+        cursor: pointer;
+        outline: none;
+        transition: border-color 0.2s;
+      }
 
-        /* КАРТОЧКА МАГАЗИНА */
+      .filter-select:hover,
+      .filter-select:focus {
+        border-color: var(--accent-color);
+      }
+
+      .filter-select option {
+        background-color: #0a0a0a;
+        color: var(--text-color);
+      }
+
+      /* СПИСОК МАГАЗИНОВ И МИКРО-ПЛАШКИ */
+      .store-list {
+        padding: 12px 15px;
+        overflow-y: auto;
+        max-height: 340px;
+      }
+
+      .store-list::-webkit-scrollbar {
+        width: 5px;
+      }
+      .store-list::-webkit-scrollbar-track {
+        background: #000;
+      }
+      .store-list::-webkit-scrollbar-thumb {
+        background: #ff0000;
+      }
+
+      .store-item {
+        border: 1px solid #333;
+        padding: 10px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          background-color 0.2s;
+      }
+      .store-item:hover {
+        border-color: var(--text-color);
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+      .store-title {
+        color: var(--text-color);
+        font-size: 15px;
+        font-weight: bold;
+        margin: 0 0 6px 0;
+        text-transform: uppercase;
+      }
+
+      /* Компактные маленькие плашечки */
+      .micro-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .micro-tag {
+        font-size: 10px;
+        line-height: 1.1;
+        padding: 2px 6px;
+        border-radius: 3px;
+        background: #151515;
+        color: #ccc;
+        border: 1px solid #333;
+        text-transform: lowercase;
+        white-space: nowrap;
+      }
+      .micro-tag.style-chip {
+        border-color: rgba(255, 0, 0, 0.6);
+        color: #ff4d4d;
+      }
+      .micro-tag.price-chip {
+        border-color: #444;
+        color: #bbb;
+      }
+
+      /* КАРТОЧКА МАГАЗИНА */
+      #store-panel {
+        position: absolute;
+        z-index: 100;
+        background-color: var(--panel-bg);
+        border: 2px solid var(--text-color);
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        overflow-y: auto;
+        backdrop-filter: blur(10px);
+      }
+
+      #store-panel::-webkit-scrollbar {
+        width: 5px;
+      }
+      #store-panel::-webkit-scrollbar-thumb {
+        background: #ff0000;
+      }
+
+      @media (min-width: 769px) {
         #store-panel {
-            position: absolute;
-            z-index: 100;
-            background-color: var(--panel-bg);
-            border: 2px solid var(--text-color);
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
-            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            overflow-y: auto;
-            backdrop-filter: blur(10px);
+          top: 0;
+          left: -450px;
+          width: 400px;
+          height: 100vh;
+          border-left: none;
+          border-top: none;
+          border-bottom: none;
+        }
+        #store-panel.active {
+          left: 0;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header-logo {
+          top: 10px;
+          right: 10px;
+          width: 180px;
+          height: 40px;
+        }
+        .logo-bg {
+          font-size: 40px;
+          right: -5px;
+          top: -10px;
+        }
+        .logo-fg {
+          font-size: 24px;
+          border-bottom: 3px solid var(--accent-color);
         }
 
-        #store-panel::-webkit-scrollbar { width: 5px; }
-        #store-panel::-webkit-scrollbar-thumb { background: #ff0000; }
-
-        @media (min-width: 769px) {
-            #store-panel {
-                top: 0; left: -450px; width: 400px; height: 100vh;
-                border-left: none; border-top: none; border-bottom: none;
-            }
-            #store-panel.active { left: 0; }
+        .ui-container {
+          width: 90%;
+          left: 5%;
+          top: 10px;
         }
-
-        @media (max-width: 768px) {
-            .header-logo { top: 10px; right: 10px; width: 180px; height: 40px;}
-            .logo-bg { font-size: 40px; right: -5px; top: -10px;}
-            .logo-fg { font-size: 24px; border-bottom: 3px solid var(--accent-color);}
-            
-            .ui-container { width: 90%; left: 5%; top: 10px; }
-            #store-panel {
-                bottom: -100vh; left: 0; width: 100%; height: 85vh;
-                border-radius: 25px 25px 0 0;
-                border-bottom: none; border-left: none; border-right: none;
-            }
-            #store-panel.active { bottom: 0; }
+        #store-panel {
+          bottom: -100vh;
+          left: 0;
+          width: 100%;
+          height: 85vh;
+          border-radius: 25px 25px 0 0;
+          border-bottom: none;
+          border-left: none;
+          border-right: none;
         }
-
-        .panel-header { padding: 20px; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #333; }
-        .panel-header h2 { margin: 0; font-size: 24px; text-transform: uppercase; color: var(--text-color); }
-        .close-btn { background: none; border: none; color: var(--text-color); font-size: 28px; cursor: pointer; line-height: 1; }
-        .close-btn:hover { color: var(--accent-color); }
-        .panel-content { padding: 20px; }
-
-        .tags-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-        .tag { background: #222; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 12px; text-transform: uppercase; border: 1px solid #444; }
-        .tag.accent { border-color: var(--accent-color); color: var(--accent-color); }
-
-        .gallery {
-            display: flex;
-            overflow-x: auto;
-            gap: 15px;
-            padding-bottom: 15px;
-            scroll-snap-type: x mandatory;
-            margin-bottom: 20px;
+        #store-panel.active {
+          bottom: 0;
         }
-        .gallery::-webkit-scrollbar { height: 6px; }
-        .gallery::-webkit-scrollbar-track { background: #111; border-radius: 3px; }
-        .gallery::-webkit-scrollbar-thumb { background: var(--text-color); border-radius: 3px; }
+      }
 
-        .gallery img {
-            height: 200px; width: 150px; object-fit: cover;
-            border-radius: 10px; scroll-snap-align: start; flex-shrink: 0;
-            cursor: zoom-in; border: 1px solid #333; transition: border-color 0.2s;
-        }
-        .gallery img:hover { border-color: var(--accent-color); }
+      .panel-header {
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 1px solid #333;
+      }
+      .panel-header h2 {
+        margin: 0;
+        font-size: 22px;
+        text-transform: uppercase;
+        color: var(--text-color);
+      }
+      .close-btn {
+        background: none;
+        border: none;
+        color: var(--text-color);
+        font-size: 28px;
+        cursor: pointer;
+        line-height: 1;
+      }
+      .close-btn:hover {
+        color: var(--accent-color);
+      }
+      .panel-content {
+        padding: 20px;
+      }
 
-        .panel-desc { font-size: 14px; line-height: 1.6; color: #ccc; margin-bottom: 30px; }
+      /* Компактный блок характеристик в карточке */
+      .specs-box {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid #2a2a2a;
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .spec-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+      .spec-label {
+        font-size: 10px;
+        color: #777;
+        text-transform: uppercase;
+        margin-right: 4px;
+        min-width: 48px;
+      }
+      .address-line {
+        font-size: 11px;
+        color: #aaa;
+        border-top: 1px dashed #2a2a2a;
+        padding-top: 6px;
+      }
 
-        .route-btn {
-            width: 100%;
-            background-color: var(--accent-color);
-            color: var(--text-color);
-            border: none;
-            padding: 15px;
-            font-family: var(--font-main);
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 50px; 
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: background 0.2s;
-            box-shadow: 0 4px 15px rgba(255,0,0,0.3);
-        }
-        .route-btn:hover { background-color: #cc0000; box-shadow: 0 6px 20px rgba(255,0,0,0.5); }
+      .gallery {
+        display: flex;
+        overflow-x: auto;
+        gap: 15px;
+        padding-bottom: 15px;
+        scroll-snap-type: x mandatory;
+        margin-bottom: 20px;
+      }
+      .gallery::-webkit-scrollbar {
+        height: 6px;
+      }
+      .gallery::-webkit-scrollbar-track {
+        background: #111;
+        border-radius: 3px;
+      }
+      .gallery::-webkit-scrollbar-thumb {
+        background: var(--text-color);
+        border-radius: 3px;
+      }
 
-        #lightbox {
-            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; cursor: zoom-out;
-        }
-        #lightbox img { max-width: 90%; max-height: 90%; border: 2px solid var(--accent-color); border-radius: 10px; }
+      .gallery img {
+        height: 200px;
+        width: 150px;
+        object-fit: cover;
+        border-radius: 10px;
+        scroll-snap-align: start;
+        flex-shrink: 0;
+        cursor: zoom-in;
+        border: 1px solid #333;
+        transition: border-color 0.2s;
+      }
+      .gallery img:hover {
+        border-color: var(--accent-color);
+      }
 
-        .ymaps-2-1-79-balloon { background-color: transparent !important; box-shadow: none !important; }
-        .ymaps-2-1-79-balloon__layout {
-            background-color: rgba(10, 10, 10, 0.95) !important;
-            border: 2px solid var(--accent-color) !important;
-            border-radius: 15px !important;
-            box-shadow: 0 10px 25px rgba(255,0,0,0.4) !important;
-            backdrop-filter: blur(5px);
-        }
-        .ymaps-2-1-79-balloon__content { padding: 0 !important; background: transparent !important; }
-        .ymaps-2-1-79-balloon__tail { display: none !important; }
-        .ymaps-2-1-79-balloon__close-button { filter: invert(1); opacity: 0.7; }
-        .ymaps-2-1-79-balloon__close-button:hover { opacity: 1; }
+      .panel-desc {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #ccc;
+        margin-bottom: 30px;
+      }
 
+      .route-btn {
+        width: 100%;
+        background-color: var(--accent-color);
+        color: var(--text-color);
+        border: none;
+        padding: 15px;
+        font-family: var(--font-main);
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 50px;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: background 0.2s;
+        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+      }
+      .route-btn:hover {
+        background-color: #cc0000;
+        box-shadow: 0 6px 20px rgba(255, 0, 0, 0.5);
+      }
+
+      #lightbox {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        cursor: zoom-out;
+      }
+      #lightbox img {
+        max-width: 90%;
+        max-height: 90%;
+        border: 2px solid var(--accent-color);
+        border-radius: 10px;
+      }
+
+      .ymaps-2-1-79-balloon {
+        background-color: transparent !important;
+        box-shadow: none !important;
+      }
+      .ymaps-2-1-79-balloon__layout {
+        background-color: rgba(10, 10, 10, 0.95) !important;
+        border: 2px solid var(--accent-color) !important;
+        border-radius: 15px !important;
+        box-shadow: 0 10px 25px rgba(255, 0, 0, 0.4) !important;
+        backdrop-filter: blur(5px);
+      }
+      .ymaps-2-1-79-balloon__content {
+        padding: 0 !important;
+        background: transparent !important;
+      }
+      .ymaps-2-1-79-balloon__tail {
+        display: none !important;
+      }
+      .ymaps-2-1-79-balloon__close-button {
+        filter: invert(1);
+        opacity: 0.7;
+      }
+      .ymaps-2-1-79-balloon__close-button:hover {
+        opacity: 1;
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <div id="map"></div>
 
     <div class="header-logo">
-        <span class="logo-bg">ショッピー</span>
-        <span class="logo-fg">Shoppy</span>
+      <span class="logo-bg">ショッピー</span>
+      <span class="logo-fg">Shoppy</span>
     </div>
 
     <div class="ui-container" id="main-ui">
-        <button class="dropdown-toggle" id="dropdownBtn">
-            <span>МАГАЗИНЫ</span>
-            <span id="dropdownIcon">▲</span>
-        </button>
+      <button class="dropdown-toggle" id="dropdownBtn">
+        <span>МАГАЗИНЫ</span>
+        <span id="dropdownIcon">▲</span>
+      </button>
 
-        <div class="dropdown-content" id="dropdownContent">
-            <div class="filters">
-                <h3>СТИЛЬ:</h3>
-                <button class="filter-btn active" data-filter="all">ВСЕ</button>
-                <button class="filter-btn" data-filter="avangard">Авангард</button>
-                <button class="filter-btn" data-filter="techwear">Теквир</button>
-                <button class="filter-btn" data-filter="vintage">Винтаж</button>
-            </div>
-            <div class="store-list" id="storeList"></div>
+      <div class="dropdown-content" id="dropdownContent">
+        <div class="filters">
+          <div class="filter-group">
+            <label for="styleSelect">СТИЛЬ:</label>
+            <select id="styleSelect" class="filter-select">
+              <option value="all">ВСЕ СТИЛИ</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="priceSelect">ЦЕНОВОЙ ДИАПАЗОН:</label>
+            <select id="priceSelect" class="filter-select">
+              <option value="all">ЛЮБАЯ ЦЕНА</option>
+            </select>
+          </div>
         </div>
+        <div class="store-list" id="storeList"></div>
+      </div>
     </div>
 
     <div id="store-panel">
-        <div class="panel-header">
-            <h2 id="sp-name">Название</h2>
-            <button class="close-btn" onclick="closeStorePanel()">×</button>
+      <div class="panel-header">
+        <h2 id="sp-name">Название</h2>
+        <button class="close-btn" onclick="closeStorePanel()">×</button>
+      </div>
+      <div class="panel-content">
+        <!-- Компактная плашка с мини-тегами -->
+        <div class="specs-box">
+          <div class="spec-row" id="sp-styles-row"></div>
+          <div class="spec-row" id="sp-prices-row"></div>
+          <div class="address-line" id="sp-address">Адрес</div>
         </div>
-        <div class="panel-content">
-            <div class="tags-container">
-                <span class="tag accent" id="sp-style">Стиль</span>
-                <span class="tag" id="sp-price">$$$</span>
-                <span class="tag" id="sp-dist" id="distance-tag">Дистанция</span>
-            </div>
-            
-            <div class="gallery" id="sp-gallery"></div>
-            <p class="panel-desc" id="sp-desc">Описание</p>
-            <button class="route-btn" id="sp-route-btn">ПРОЛОЖИТЬ МАРШРУТ</button>
-        </div>
+
+        <div class="gallery" id="sp-gallery"></div>
+        <p class="panel-desc" id="sp-desc">Описание</p>
+        <button class="route-btn" id="sp-route-btn">ПРОЛОЖИТЬ МАРШРУТ</button>
+      </div>
     </div>
 
-    <div id="lightbox" onclick="this.style.display='none'">
-        <img id="lightbox-img" src="" alt="Zoomed image">
+    <div id="lightbox" onclick="this.style.display = 'none'">
+      <img id="lightbox-img" src="" alt="Zoomed image" />
     </div>
 
     <script>
-        const stores = [
-            {
-                id: 1,
-                name: "VOID STORE",
-                style: "avangard", styleName: "АВАНГАРД",
-                price: "Высокая цена", distance: "Центр",
-                desc: "Темный концепт-стор с асимметричным кроем. Эксклюзивные дропы от локальных дизайнеров, работающих с деконструкцией. Вход через арку, дверь без вывески.",
-                coords: [55.761244, 37.618423],
-                photos: [
-                    "https://picsum.photos/seed/void1/400/600",
-                    "https://picsum.photos/seed/void2/400/600",
-                    "https://picsum.photos/seed/void3/400/600"
-                ]
-            },
-            {
-                id: 2,
-                name: "CYBER CITY",
-                style: "techwear", styleName: "ТЕКВИР",
-                price: "Средняя цена", distance: "Арбат",
-                desc: "Технологичная одежда, много карманов, Gore-Tex мембраны и стропы. Идеально для городских ниндзя. Только по предварительной записи.",
-                coords: [55.742023, 37.598711],
-                photos: [
-                    "https://picsum.photos/seed/cyber1/400/600",
-                    "https://picsum.photos/seed/cyber2/400/600",
-                    "https://picsum.photos/seed/cyber3/400/600"
-                ]
-            },
-            {
-                id: 3,
-                name: "ARCHIVE 99",
-                style: "vintage", styleName: "ВИНТАЖ",
-                price: "Очень дорого", distance: "Китай-Город",
-                desc: "Редкий японский архив, вещи с показов 90-х и нулевых. Коллекционные айтемы, которые нельзя найти в обычных секондах.",
-                coords: [55.757131, 37.631698],
-                photos: [
-                    "https://picsum.photos/seed/arch1/400/600",
-                    "https://picsum.photos/seed/arch2/400/600",
-                    "https://picsum.photos/seed/arch3/400/600"
-                ]
-            }
-        ];
+      // URL твоего бэкенда. Локально это http://127.0.0.1:5000
+      // После деплоя на PythonAnywhere заменишь на https://ТВОЙ_ЛОГИН.pythonanywhere.com
+      const API_BASE_URL =
+        "https://unitedsocietyofavangard.pythonanywhere.com/";
 
-        let map;
-        let placemarks = [];
-        
-        // --- ЗАФИКСИРОВАННЫЕ КООРДИНАТЫ МОСКВЫ ---
-        // Берем границы строго по МКАД
-        const moscowExactBounds = [
-            [55.57, 37.36], // Юго-Запад МКАД
-            [55.91, 37.85]  // Северо-Восток МКАД
-        ];
+      let stores = [];
+      let map;
+      let placemarks = [];
+      let circleLayout;
 
-        const storePanel = document.getElementById('store-panel');
-        const mainUI = document.getElementById('main-ui');
-        
-        const dropdownBtn = document.getElementById('dropdownBtn');
-        const dropdownContent = document.getElementById('dropdownContent');
-        const dropdownIcon = document.getElementById('dropdownIcon');
+      const moscowExactBounds = [
+        [55.57, 37.36],
+        [55.91, 37.85],
+      ];
 
-        dropdownBtn.addEventListener('click', () => {
-            dropdownContent.classList.toggle('collapsed');
-            dropdownIcon.textContent = dropdownContent.classList.contains('collapsed') ? '▼' : '▲';
-        });
+      const storePanel = document.getElementById("store-panel");
+      const mainUI = document.getElementById("main-ui");
+      const dropdownBtn = document.getElementById("dropdownBtn");
+      const dropdownContent = document.getElementById("dropdownContent");
+      const dropdownIcon = document.getElementById("dropdownIcon");
+      const storeList = document.getElementById("storeList");
+      const styleSelect = document.getElementById("styleSelect");
+      const priceSelect = document.getElementById("priceSelect");
 
-        const storeList = document.getElementById('storeList');
-        function renderList() {
-            storeList.innerHTML = '';
-            stores.forEach(store => {
-                const item = document.createElement('div');
-                item.className = 'store-item';
-                item.dataset.style = store.style;
-                item.innerHTML = `
-                    <h4 class="store-title">${store.name}</h4>
-                    <div class="store-style">[ ${store.styleName} ]</div>
-                `;
-                item.addEventListener('click', () => {
-                    if (map) map.setCenter(store.coords, 14, { duration: 400 });
-                    openStorePanel(store.id); 
-                });
-                storeList.appendChild(item);
-            });
+      dropdownBtn.addEventListener("click", () => {
+        dropdownContent.classList.toggle("collapsed");
+        dropdownIcon.textContent = dropdownContent.classList.contains(
+          "collapsed",
+        )
+          ? "▼"
+          : "▲";
+      });
+
+      // 1. Загружаем справочники стилей и цен для выпадающих списков
+      async function loadFilters() {
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/filters`);
+          const data = await res.json();
+
+          data.styles.forEach((s) => {
+            const opt = document.createElement("option");
+            opt.value = s.id;
+            opt.textContent = s.name.toUpperCase();
+            styleSelect.appendChild(opt);
+          });
+
+          data.price_ranges.forEach((p) => {
+            const opt = document.createElement("option");
+            opt.value = p.id;
+            opt.textContent = p.name.toUpperCase();
+            priceSelect.appendChild(opt);
+          });
+        } catch (err) {
+          console.error("Ошибка загрузки фильтров с бэкенда:", err);
+        }
+      }
+
+      // 2. Загружаем отсортированные/отфильтрованные магазины с бэкенда
+      async function loadStores() {
+        const styleId = styleSelect.value;
+        const priceId = priceSelect.value;
+
+        try {
+          const res = await fetch(
+            `${API_BASE_URL}/api/stores?style_id=${styleId}&price_id=${priceId}`,
+          );
+          stores = await res.json();
+          renderList();
+          renderPlacemarks();
+        } catch (err) {
+          console.error("Ошибка загрузки магазинов:", err);
+          storeList.innerHTML =
+            '<div style="color:#ff4d4d; font-size:12px;">Не удалось подключиться к бэкенду (проверь, запущен ли app.py)</div>';
+        }
+      }
+
+      // Отрисовка списка слева с маленькими плашками
+      function renderList() {
+        storeList.innerHTML = "";
+        if (stores.length === 0) {
+          storeList.innerHTML =
+            '<div style="color:#888; font-size:12px;">Магазинов по этим фильтрам не найдено</div>';
+          return;
         }
 
-        ymaps.ready(initMap);
+        stores.forEach((store) => {
+          const item = document.createElement("div");
+          item.className = "store-item";
 
-        function initMap() {
-            map = new ymaps.Map("map", {
-                center: [55.753215, 37.622504],
-                zoom: 10,
-                controls: [] 
-            });
+          const styleChips = store.styles
+            .map((st) => `<span class="micro-tag style-chip">${st}</span>`)
+            .join("");
+          const priceChips = store.prices
+            .map((pr) => `<span class="micro-tag price-chip">${pr}</span>`)
+            .join("");
 
-            function fitAndLockMap() {
-                // Снимаем лимиты перед перерасчетом
-                map.options.set('restrictMapArea', false);
-                map.options.set('minZoom', 0);
-                
-                // Подгоняем камеру под точные границы МКАДа.
-                // Установка margin позволит интерфейсу не перекрывать Москву
-                map.setBounds(moscowExactBounds, {
-                    checkZoomRange: true,
-                    // Задаем отступы: [Верх, Право, Низ, Лево]
-                    // Для ПК: слева у нас интерфейс, справа пусто, сверху лого.
-                    // Для мобилки: снизу может выехать панель.
-                    zoomMargin: 40
-                }).then(() => {
-                    // Важный трюк: мы принудительно отдаляем карту еще на 1 шаг
-                    // чтобы Москва точно поместилась целиком и с боков, и сверху.
-                    const optimalZoom = map.getZoom();
-                    const perfectZoom = optimalZoom - 1; 
-                    
-                    map.setZoom(perfectZoom, { duration: 0 }).then(() => {
-                        // Фиксируем этот идеальный зум как минимальный
-                        map.options.set('minZoom', perfectZoom);
-                        map.options.set('maxZoom', 16);
-                        
-                        // Жестко фиксируем камеру (restrictMapArea) в текущей видимой области
-                        // Это не дает сдвинуть камеру, когда мы отдалены по максимуму!
-                        const currentVisibleBounds = map.getBounds();
-                        map.options.set('restrictMapArea', currentVisibleBounds);
-                    });
-                });
-            }
+          item.innerHTML = `
+                    <h4 class="store-title">${store.name}</h4>
+                    <div class="micro-tags">
+                        ${styleChips}
+                        ${priceChips}
+                    </div>
+                `;
+          item.addEventListener("click", () => {
+            if (map) map.setCenter(store.coords, 15, { duration: 400 });
+            openStorePanel(store.id);
+          });
+          storeList.appendChild(item);
+        });
+      }
 
-            // Вызываем подгонку при загрузке
-            fitAndLockMap();
+      // Отрисовка меток на Яндекс Карте
+      function renderPlacemarks() {
+        if (!map || !circleLayout) return;
 
-            // Пересчитываем при повороте экрана смартфона или ресайзе браузера
-            let resizeTimeout;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(fitAndLockMap, 200);
-            });
+        // Удаляем старые метки перед перерисовкой
+        placemarks.forEach((pm) => map.geoObjects.remove(pm));
+        placemarks = [];
 
-            const circleLayout = ymaps.templateLayoutFactory.createClass(
-                '<div style="width:20px; height:20px; background-color:#ffffff; border:3px solid #ff0000; border-radius:50%; box-sizing:border-box; box-shadow: 0 0 10px rgba(0,0,0,0.8); transform: translate(-10px, -10px);"></div>'
-            );
-
-            stores.forEach(store => {
-                const balloonHTML = `
-                    <div style="padding: 20px 15px 15px; text-align: center; min-width: 180px;">
-                        <h3 style="margin: 0 0 5px 0; color: #fff; font-family: 'Courier New', monospace; font-size: 20px; text-transform: uppercase; letter-spacing: 1px;">${store.name}</h3>
-                        <div style="color: #ff0000; font-size: 12px; margin-bottom: 15px; font-family: 'Courier New', monospace; font-weight: bold;">[ ${store.styleName} ]</div>
-                        <button style="background: #fff; color: #000; border: none; padding: 10px 20px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; font-family: 'Courier New', monospace; font-size: 14px; transition: 0.2s;" 
+        stores.forEach((store) => {
+          const miniStyles = store.styles.join(" • ");
+          const balloonHTML = `
+                    <div style="padding: 18px 15px 15px; text-align: center; min-width: 190px;">
+                        <h3 style="margin: 0 0 6px 0; color: #fff; font-family: 'Courier New', monospace; font-size: 18px; text-transform: uppercase;">${store.name}</h3>
+                        <div style="color: #ff4d4d; font-size: 11px; margin-bottom: 12px; font-family: 'Courier New', monospace;">${miniStyles}</div>
+                        <button style="background: #fff; color: #000; border: none; padding: 9px 18px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; font-family: 'Courier New', monospace; font-size: 13px; transition: 0.2s;" 
                         onmouseover="this.style.background='#ff0000'; this.style.color='#fff';" 
                         onmouseout="this.style.background='#fff'; this.style.color='#000';"
                         onclick="window.openStorePanel(${store.id})">ОТКРЫТЬ КАРТОЧКУ</button>
                     </div>
                 `;
 
-                const placemark = new ymaps.Placemark(store.coords, {
-                    balloonContent: balloonHTML,
-                    hintContent: store.name
-                }, {
-                    iconLayout: circleLayout,
-                    iconShape: { type: 'Circle', coordinates: [0, 0], radius: 10 }
-                });
-                
-                placemark.storeId = store.id;
-                placemark.storeStyle = store.style;
-                
-                placemarks.push(placemark);
-                map.geoObjects.add(placemark);
-            });
-            
-            const moscowPolygonCoords = [
-                // 1. Внешний прямоугольник (Локальная граница тьмы)
-                [
-                    [57.0, 35.0], // СЗ
-                    [54.0, 35.0], // ЮЗ
-                    [54.0, 40.0], // ЮВ
-                    [57.0, 40.0], // СВ
-                    [57.0, 35.0]  // СЗ
-                ],
-                // 2. Внутренний вырез - контур МКАДа (дырка)
-                [
-                    [55.91, 37.58], // Север 
-                    [55.89, 37.67], 
-                    [55.88, 37.75], 
-                    [55.83, 37.83], 
-                    [55.77, 37.84], // Восток 
-                    [55.68, 37.83], 
-                    [55.63, 37.81], 
-                    [55.58, 37.72], 
-                    [55.57, 37.60], // Юг 
-                    [55.59, 37.50], 
-                    [55.63, 37.44], 
-                    [55.71, 37.38], 
-                    [55.77, 37.37], // Запад 
-                    [55.82, 37.39], 
-                    [55.87, 37.43], 
-                    [55.89, 37.50], 
-                    [55.91, 37.58]  // Замыкаем на Севере
-                ]
-            ];
+          const placemark = new ymaps.Placemark(
+            store.coords,
+            {
+              balloonContent: balloonHTML,
+              hintContent: store.name,
+            },
+            {
+              iconLayout: circleLayout,
+              iconShape: { type: "Circle", coordinates: [0, 0], radius: 10 },
+            },
+          );
 
-            const worldMask = new ymaps.Polygon(moscowPolygonCoords, {}, {
-                fillColor: '#000000',     // 100% черный цвет
-                fillOpacity: 0.95,        // Почти непрозрачно
-                fillRule: 'nonZero',      
-                strokeColor: '#ff0000',   // Красная граница
-                strokeWidth: 3,           
-                interactivityModel: 'default#transparent' 
-            });
-            
-            map.geoObjects.add(worldMask);
-        }
+          placemarks.push(placemark);
+          map.geoObjects.add(placemark);
+        });
+      }
 
-        window.openStorePanel = function(id) {
-            const store = stores.find(s => s.id === id);
-            if(!store) return;
+      styleSelect.addEventListener("change", loadStores);
+      priceSelect.addEventListener("change", loadStores);
 
-            document.getElementById('sp-name').textContent = store.name;
-            document.getElementById('sp-style').textContent = store.styleName;
-            document.getElementById('sp-price').textContent = store.price;
-            document.getElementById('sp-dist').textContent = store.distance;
-            document.getElementById('sp-desc').textContent = store.desc;
+      ymaps.ready(initMap);
 
-            const gallery = document.getElementById('sp-gallery');
-            gallery.innerHTML = '';
-            store.photos.forEach(photoUrl => {
-                const img = document.createElement('img');
-                img.src = photoUrl;
-                img.onclick = () => openLightbox(photoUrl);
-                gallery.appendChild(img);
-            });
-
-            const routeBtn = document.getElementById('sp-route-btn');
-            routeBtn.onclick = () => openYandexMapsWithRealGeo(store.coords);
-
-            map.balloon.close();
-            storePanel.classList.add('active');
-            
-            if(window.innerWidth <= 768) {
-                mainUI.style.opacity = '0';
-                mainUI.style.pointerEvents = 'none';
-            }
-        };
-
-        window.closeStorePanel = function() {
-            storePanel.classList.remove('active');
-            if(window.innerWidth <= 768) {
-                mainUI.style.opacity = '1';
-                mainUI.style.pointerEvents = 'auto';
-            }
-        };
-
-        function openLightbox(url) {
-            document.getElementById('lightbox-img').src = url;
-            document.getElementById('lightbox').style.display = 'flex';
-        }
-
-        function openYandexMapsWithRealGeo(storeCoords) {
-            const routeBtn = document.getElementById('sp-route-btn');
-            routeBtn.innerHTML = 'ИЩЕМ ГЕОПОЗИЦИЮ...';
-            
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        routeBtn.innerHTML = 'ПРОЛОЖИТЬ МАРШРУТ';
-                        const userLat = position.coords.latitude;
-                        const userLon = position.coords.longitude;
-                        
-                        const yandexUrl = `https://yandex.ru/maps/?rtext=${userLat},${userLon}~${storeCoords[0]},${storeCoords[1]}&rtt=pd`;
-                        window.open(yandexUrl, '_blank');
-                    },
-                    function(error) {
-                        routeBtn.innerHTML = 'ПРОЛОЖИТЬ МАРШРУТ';
-                        console.warn("Ошибка гео:", error.message);
-                        
-                        const fallbackUrl = `https://yandex.ru/maps/?rtext=~${storeCoords[0]},${storeCoords[1]}&rtt=pd`;
-                        window.open(fallbackUrl, '_blank');
-                    },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                );
-            } else {
-                routeBtn.innerHTML = 'ПРОЛОЖИТЬ МАРШРУТ';
-                const fallbackUrl = `https://yandex.ru/maps/?rtext=~${storeCoords[0]},${storeCoords[1]}&rtt=pd`;
-                window.open(fallbackUrl, '_blank');
-            }
-        }
-
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                filterBtns.forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                const selectedStyle = e.target.dataset.filter;
-
-                document.querySelectorAll('.store-item').forEach(item => {
-                    item.classList.toggle('hidden', selectedStyle !== 'all' && item.dataset.style !== selectedStyle);
-                });
-
-                placemarks.forEach(pm => {
-                    const isVisible = selectedStyle === 'all' || pm.storeStyle === selectedStyle;
-                    pm.options.set('visible', isVisible);
-                    if(!isVisible) pm.balloon.close();
-                });
-            });
+      function initMap() {
+        map = new ymaps.Map("map", {
+          center: [55.753215, 37.622504],
+          zoom: 10,
+          controls: [],
         });
 
-        renderList();
+        function fitAndLockMap() {
+          map.options.set("restrictMapArea", false);
+          map.options.set("minZoom", 0);
+
+          map
+            .setBounds(moscowExactBounds, {
+              checkZoomRange: true,
+              zoomMargin: 40,
+            })
+            .then(() => {
+              const optimalZoom = map.getZoom();
+              const perfectZoom = optimalZoom - 1;
+
+              map.setZoom(perfectZoom, { duration: 0 }).then(() => {
+                map.options.set("minZoom", perfectZoom);
+                map.options.set("maxZoom", 17);
+                const currentVisibleBounds = map.getBounds();
+                map.options.set("restrictMapArea", currentVisibleBounds);
+              });
+            });
+        }
+
+        fitAndLockMap();
+
+        let resizeTimeout;
+        window.addEventListener("resize", () => {
+          clearTimeout(resizeTimeout);
+          resizeTimeout = setTimeout(fitAndLockMap, 200);
+        });
+
+        circleLayout = ymaps.templateLayoutFactory.createClass(
+          '<div style="width:20px; height:20px; background-color:#ffffff; border:3px solid #ff0000; border-radius:50%; box-sizing:border-box; box-shadow: 0 0 10px rgba(0,0,0,0.8); transform: translate(-10px, -10px);"></div>',
+        );
+
+        const moscowPolygonCoords = [
+          [
+            [57.0, 35.0],
+            [54.0, 35.0],
+            [54.0, 40.0],
+            [57.0, 40.0],
+            [57.0, 35.0],
+          ],
+          [
+            [55.91, 37.58],
+            [55.89, 37.67],
+            [55.88, 37.75],
+            [55.83, 37.83],
+            [55.77, 37.84],
+            [55.68, 37.83],
+            [55.63, 37.81],
+            [55.58, 37.72],
+            [55.57, 37.6],
+            [55.59, 37.5],
+            [55.63, 37.44],
+            [55.71, 37.38],
+            [55.77, 37.37],
+            [55.82, 37.39],
+            [55.87, 37.43],
+            [55.89, 37.5],
+            [55.91, 37.58],
+          ],
+        ];
+
+        const worldMask = new ymaps.Polygon(
+          moscowPolygonCoords,
+          {},
+          {
+            fillColor: "#000000",
+            fillOpacity: 0.95,
+            fillRule: "nonZero",
+            strokeColor: "#ff0000",
+            strokeWidth: 3,
+            interactivityModel: "default#transparent",
+          },
+        );
+
+        map.geoObjects.add(worldMask);
+
+        // Запускаем загрузку фильтров и магазинов после инициализации карты
+        loadFilters().then(loadStores);
+      }
+
+      window.openStorePanel = function (id) {
+        const store = stores.find((s) => s.id === id);
+        if (!store) return;
+
+        document.getElementById("sp-name").textContent = store.name;
+
+        const stylesRow = document.getElementById("sp-styles-row");
+        stylesRow.innerHTML =
+          `<span class="spec-label">Стиль:</span>` +
+          store.styles
+            .map((st) => `<span class="micro-tag style-chip">${st}</span>`)
+            .join("");
+
+        const pricesRow = document.getElementById("sp-prices-row");
+        pricesRow.innerHTML =
+          `<span class="spec-label">Прайс:</span>` +
+          store.prices
+            .map((pr) => `<span class="micro-tag price-chip">${pr}</span>`)
+            .join("");
+
+        document.getElementById("sp-address").textContent = store.location;
+        document.getElementById("sp-desc").textContent = store.desc;
+
+        const gallery = document.getElementById("sp-gallery");
+        gallery.innerHTML = "";
+        store.photos.forEach((photoUrl) => {
+          const img = document.createElement("img");
+          img.src = photoUrl;
+          img.onclick = () => openLightbox(photoUrl);
+          gallery.appendChild(img);
+        });
+
+        const routeBtn = document.getElementById("sp-route-btn");
+        routeBtn.onclick = () => openYandexMapsWithRealGeo(store.coords);
+
+        map.balloon.close();
+        storePanel.classList.add("active");
+
+        if (window.innerWidth <= 768) {
+          mainUI.style.opacity = "0";
+          mainUI.style.pointerEvents = "none";
+        }
+      };
+
+      window.closeStorePanel = function () {
+        storePanel.classList.remove("active");
+        if (window.innerWidth <= 768) {
+          mainUI.style.opacity = "1";
+          mainUI.style.pointerEvents = "auto";
+        }
+      };
+
+      function openLightbox(url) {
+        document.getElementById("lightbox-img").src = url;
+        document.getElementById("lightbox").style.display = "flex";
+      }
+
+      function openYandexMapsWithRealGeo(storeCoords) {
+        const routeBtn = document.getElementById("sp-route-btn");
+        routeBtn.innerHTML = "ИЩЕМ ГЕОПОЗИЦИЮ...";
+
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            function (position) {
+              routeBtn.innerHTML = "ПРОЛОЖИТЬ МАРШРУТ";
+              const userLat = position.coords.latitude;
+              const userLon = position.coords.longitude;
+              const yandexUrl = `https://yandex.ru/maps/?rtext=${userLat},${userLon}~${storeCoords[0]},${storeCoords[1]}&rtt=pd`;
+              window.open(yandexUrl, "_blank");
+            },
+            function () {
+              routeBtn.innerHTML = "ПРОЛОЖИТЬ МАРШРУТ";
+              const fallbackUrl = `https://yandex.ru/maps/?rtext=~${storeCoords[0]},${storeCoords[1]}&rtt=pd`;
+              window.open(fallbackUrl, "_blank");
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+          );
+        } else {
+          routeBtn.innerHTML = "ПРОЛОЖИТЬ МАРШРУТ";
+          const fallbackUrl = `https://yandex.ru/maps/?rtext=~${storeCoords[0]},${storeCoords[1]}&rtt=pd`;
+          window.open(fallbackUrl, "_blank");
+        }
+      }
     </script>
-</body>
+  </body>
 </html>
